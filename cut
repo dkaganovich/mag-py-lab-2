@@ -1,0 +1,70 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+
+"""
+This module provides a cut-like functionality
+allowing one to modify an input file by removing/replacing its particular columns
+""" 
+
+
+import argparse
+import os.path
+import re
+
+
+def file_cut(path, order, sep):
+    """ 
+    Generator method to cut file data.
+
+    Abstr:
+        For each line it extracts column values by splitting the line using **sep** and yields a new line 
+        consisting of the columns ordered by **order** list
+    Args:
+        path - existing file path
+        order - list of columns to output
+        sep - column separator
+    """
+    with open(path, "r") as f:
+        for l in f:
+            cols = l.split(sep)
+            if order is None:# nothing to do
+                yield l
+            else:
+                if len(cols) < max(order):
+                    raise ValueError("Malformed file: expected number of fields %d, got %d" % (max(order), len(cols)))
+                yield sep.join(cols[i - 1].rstrip("\r\n") for i in order)
+
+
+def fields_type(s):
+    """Argparse needs this method to parse --fields argument correctly"""
+    try:
+        re.match("^([1-9]+,?)+$", s)
+        return tuple(int(o) for o in s.split(","))
+    except:
+        raise argparse.ArgumentTypeError("String '%s' does not match required format\nTry 'cut --help' for more information" % s)
+
+
+def main():
+    """Driver method to parse command line arguments and start a file transformation"""
+    parser = argparse.ArgumentParser(description="remove sections from each line of file")
+    parser.add_argument("-f", "--fields", metavar = "FIELD1,FIELD2,...", type = fields_type, dest = "order", help="fields to select")
+    parser.add_argument("-s", "--separator", metavar = "SEPARATOR", dest = "sep", default="\t", help="field separator")
+    # parser.add_argument("file", type=argparse.FileType("r"), help="file to process")
+    parser.add_argument("path", metavar = "FILE", help="file to process")
+    args = parser.parse_args()
+    if not os.path.isfile(args.path):
+        print "File does not exist"
+        exit(1)
+    try:
+        for l in file_cut(args.path, args.order, args.sep):
+            print l
+    except (ValueError, IOError) as e:
+        print "File cut error: %s" % e
+    except:
+        print "Unexpected error"
+        raise
+
+
+if __name__ == "__main__":
+    main()
