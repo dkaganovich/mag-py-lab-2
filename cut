@@ -29,7 +29,7 @@ def file_cut(path, order, sep):
         for l in f:
             cols = l.split(sep)
             if order is None:# nothing to do
-                yield l
+                yield l.rstrip("\r\n")
             else:
                 if len(cols) < max(order):
                     raise ValueError("Malformed file: expected number of fields %d, got %d" % (max(order), len(cols)))
