@@ -76,6 +76,7 @@ from math import sqrt
 class Vector:
     def __init__(self, *data):
         self.data = tuple(data)
+        self.ndim = len(data)
     def magnitude(self):
         return sqrt(sum(a**2 for a in self))
     def __add__(self, o):
@@ -116,5 +117,7 @@ class Vector:
 # print a == b
 # print a == c
 # print a.magnitude()
+# for i in xrange(a.ndim):
+#     print a[i]
 # for i in a:
 #     print i
