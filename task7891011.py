@@ -40,31 +40,24 @@ class Cartesian:
 
 
 # 10
-def pretty_format(obj, obj_str = "", pos = 0, offset = 0, result = ""):
-    if pos == 0:
-        obj_str = str(obj)
-    while pos < len(obj_str):
-        if obj_str[pos] == "[" or obj_str[pos] == "{":
-            if len(result) > 0 and result[-1] == "\n":
-                result += "\t" * offset
-            result += obj_str[pos] + "\n"
-            offset += 1
-            pos += 1
-            break
-        elif obj_str[pos] == "]" or obj_str[pos] == "}":
-            offset -= 1
-            result += "\n" + "\t" * offset + obj_str[pos]
-        elif obj_str[pos] == ",":
-            result += ",\n"
-        elif obj_str[pos] != " ":
-            if len(result) > 0 and result[-1] == "\n":
-                result += "\t" * offset
-            result += obj_str[pos]
-        else:
-            pass
-        pos += 1
-    if pos != len(obj_str):
-        result = pretty_format(obj, obj_str, pos, offset, result)
+def pretty_format(obj, offset = 0):
+    result = ""
+    if isinstance(obj, list):
+        result += "[\n"
+        offset += 1
+        for o in obj:
+            result += "\t" * offset + pretty_format(o, offset) + ",\n"
+        offset -= 1
+        result += "\t" * offset + "]"
+    elif isinstance(obj, dict):
+        result += "{\n"
+        offset += 1
+        for k, v in obj.iteritems():
+            result += "\t" * offset + pretty_format(k, offset) + ":" + pretty_format(v, offset) + ",\n"
+        offset -= 1
+        result += "\t" * offset + "}"
+    else:
+        result += str(obj)
     return result
 # print pretty_format([{3:{3:["a",2,3]}}, {1:2, 'a': [1, 245], 'b': 'hi'}])
 
